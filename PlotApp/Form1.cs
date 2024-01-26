@@ -6,9 +6,25 @@ namespace PlotApp
     {
         int counter = 0; // program counter ticks at sample rate
         int points = 10; // number of previous points to be plotted
-        int interval = 100; // refresh rate
+        int interval = 250; // refresh rate
         const int NumberOfSignals = 6; // signals chosen to analyze
         double[][] data = new double[NumberOfSignals][]; // incoming data
+
+        ScottPlot.AxisPanels.LeftAxis[] axis = new ScottPlot.AxisPanels.LeftAxis[NumberOfSignals];
+
+        ScottPlot.Color[] palette =
+        [
+            Colors.SeaGreen,
+            Colors.DarkOrange,
+            Colors.Lime,
+            Colors.DarkGray,
+            Colors.DodgerBlue,
+            Colors.DeepPink,
+            Colors.Yellow,
+            Colors.Bisque,
+            Colors.MintCream,
+            Colors.DarkKhaki,
+        ];
 
         // temporary button toggles
         bool view = false;
@@ -59,26 +75,13 @@ namespace PlotApp
             // generate the signal
             ScottPlot.Plottables.Signal[] sig = new ScottPlot.Plottables.Signal[NumberOfSignals];
 
-            ScottPlot.Color[] palette =
-            [
-                Colors.SeaGreen,
-                Colors.DarkOrange,
-                Colors.Lime,
-                Colors.DarkGray,
-                Colors.DodgerBlue,
-                Colors.DeepPink,
-                Colors.Yellow,
-                Colors.Bisque,
-                Colors.MintCream,
-                Colors.DarkKhaki,
-            ];
-
             formsPlot1.Plot.Clear();
             for (int i = 0; i < NumberOfSignals; i++)
             {
                 if (trace[i] == false)
                 {
                     sig[i] = formsPlot1.Plot.Add.Signal(data[i]);
+                    sig[i].Axes.YAxis = axis[i];
                     sig[i].Color = palette[i];
                 }
             }
@@ -94,7 +97,7 @@ namespace PlotApp
             // update chart and view mode
             updateChart();
 
-            // stop refreshing if pause is toggled (update ScottPlot when released and use renderLock)
+            // stop refreshing if pause is toggled
             if (pause == false)
             {
                 formsPlot1.Refresh();
@@ -105,8 +108,20 @@ namespace PlotApp
         private void CreateChart() // set plot labels
         {
             formsPlot1.Plot.XLabel("Time");
-            formsPlot1.Plot.YLabel("Position");
-            formsPlot1.Plot.Title("6 Trace Plot");
+            formsPlot1.Plot.Axes.Remove(Edge.Left);
+            formsPlot1.Plot.Axes.Remove(Edge.Right);
+            formsPlot1.Plot.Axes.Remove(Edge.Top);
+
+            // handle n amount of axes
+            for (int i = 0; i < NumberOfSignals;i++)
+            {
+                if (data[i] != null)
+                {
+                    axis[i] = formsPlot1.Plot.Axes.AddLeftAxis();
+                    axis[i].Color(palette[i]);
+                    // axis[i].Label.Text = "Signal " + (i + 1);
+                }
+            }
             formsPlot1.Refresh();
         }
 
