@@ -4,15 +4,17 @@ namespace PlotApp
 {
     public partial class PlotApp : Form
     {
-        int counter = 0; // program counter ticks at sample rate
-        int points = 10; // number of previous points to be plotted
-        int interval = 250; // refresh rate
+        double counter = DateTime.Now.ToNumber(); // program counter ticks at sample rate
+        double start = DateTime.Now.ToNumber(); // program counter ticks at sample rate
+        readonly int points = 10; // number of previous points to be plotted
+        int interval = 1000; // refresh rate
         const int NumberOfSignals = 6; // signals chosen to analyze
         double[][] data = new double[NumberOfSignals][]; // incoming data
+        const double secondtoSample = 1D/86400; // seconds to percent
 
-        ScottPlot.AxisPanels.LeftAxis[] axis = new ScottPlot.AxisPanels.LeftAxis[NumberOfSignals];
+        readonly ScottPlot.AxisPanels.LeftAxis[] axis = new ScottPlot.AxisPanels.LeftAxis[NumberOfSignals];
 
-        ScottPlot.Color[] palette =
+        readonly ScottPlot.Color[] palette =
         [
             Colors.SeaGreen,
             Colors.DarkOrange,
@@ -78,18 +80,17 @@ namespace PlotApp
             formsPlot1.Plot.Clear();
             for (int i = 0; i < NumberOfSignals; i++)
             {
-                if (trace[i] == false)
+                if (!trace[i])
                 {
-                    sig[i] = formsPlot1.Plot.Add.Signal(data[i]);
+                    sig[i] = formsPlot1.Plot.Add.Signal(data[i], secondtoSample, color: palette[i]);
                     sig[i].Axes.YAxis = axis[i];
-                    sig[i].Color = palette[i];
+                    sig[i].Data.XOffset = start;
                 }
             }
 
             // increment x-axis
-            //dataX = dataX.Append(counter).ToArray();
             dataX = [.. dataX, counter];
-            counter++;
+            counter += secondtoSample;
         }
 
         private void timer1_Tick(object sender, EventArgs e) // callback performed at tick rate
@@ -98,7 +99,7 @@ namespace PlotApp
             updateChart();
 
             // stop refreshing if pause is toggled
-            if (pause == false)
+            if (!pause)
             {
                 formsPlot1.Refresh();
                 viewMode();
@@ -119,18 +120,18 @@ namespace PlotApp
                 {
                     axis[i] = formsPlot1.Plot.Axes.AddLeftAxis();
                     axis[i].Color(palette[i]);
-                    // axis[i].Label.Text = "Signal " + (i + 1);
                 }
             }
+            formsPlot1.Plot.Axes.DateTimeTicks(Edge.Bottom);
             formsPlot1.Refresh();
         }
 
         private void viewMode() // logic for view selection
         {
-            if (view == true) // view last n
+            if (view) // view last n
             {
                 formsPlot1.Plot.Axes.AutoScaleY();
-                formsPlot1.Plot.Axes.SetLimitsX(counter - points, counter); // FIX:: based on time not samples
+                formsPlot1.Plot.Axes.SetLimitsX(counter-(secondtoSample*points), counter);
             }
             else // auto scale
             {
@@ -138,9 +139,9 @@ namespace PlotApp
             }
         }
 
+        Random rand = new();
         private double generateData() // return random value
         {
-            Random rand = new();
             return rand.NextDouble() * 10;
         }
 
