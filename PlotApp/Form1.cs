@@ -1,18 +1,25 @@
 using ScottPlot;
+using ScottPlot.WinForms;
 
 namespace PlotApp
 {
     public partial class PlotApp : Form
     {
-        double counter = DateTime.Now.ToNumber(); // program counter ticks at sample rate
-        double start = DateTime.Now.ToNumber(); // program counter ticks at sample rate
-        readonly int points = 10; // number of previous points to be plotted
-        int interval = 1000; // refresh rate
-        const int NumberOfSignals = 6; // signals chosen to analyze
-        double[][] data = new double[NumberOfSignals][]; // incoming data
-        const double secondtoSample = 1D/86400; // seconds to percent
 
-        readonly ScottPlot.AxisPanels.LeftAxis[] axis = new ScottPlot.AxisPanels.LeftAxis[NumberOfSignals];
+        double counter = DateTime.Now.ToNumber(); // program counter
+        double start = DateTime.Now.ToNumber(); // program starting time
+        readonly int seconds = 10; // number of previous seconds to be plotted
+        const int MaxPoints = 2000; // number of previous points to keep in memory
+        const int refresh_rate = 10; // refresh rate
+        const int NumberOfSignals = 6; // signals chosen to analyze
+        List<double>[] data = new List<double>[NumberOfSignals]; // incoming data
+        const double conversion = 1000 / refresh_rate;
+        const double secondtoSample = (1D/86400)/conversion; // seconds to percent
+        int currentSampleCount = 0;
+
+        readonly ScottPlot.AxisPanels.LeftAxis[] axisL = new ScottPlot.AxisPanels.LeftAxis[NumberOfSignals];
+        readonly ScottPlot.AxisPanels.RightAxis[] axisR = new ScottPlot.AxisPanels.RightAxis[NumberOfSignals];
+        readonly ScottPlot.Plottables.Signal[] sig = new ScottPlot.Plottables.Signal[NumberOfSignals];
 
         readonly ScottPlot.Color[] palette =
         [
@@ -57,10 +64,34 @@ namespace PlotApp
             System.Windows.Forms.Timer timer1 = new System.Windows.Forms.Timer
             {
                 Enabled = true,
-                Interval = interval
+                Interval = refresh_rate
             };
             timer1.Start();
             timer1.Tick += timer1_Tick;
+        }
+
+        int c = 1;
+        public double GetNextSineValue()
+        {
+            const int SamplesPerPeriod = 600;
+            // Increment the sample count
+            currentSampleCount++;
+
+            // Reset the sample count if it exceeds the specified limit
+            if (currentSampleCount > SamplesPerPeriod)
+            {
+                currentSampleCount = 1;
+                c++;
+            }
+
+            // Calculate the phase based on the current sample count
+            double phase = 2 * Math.PI * currentSampleCount / SamplesPerPeriod;
+
+            // Calculate the sine value
+            double sineValue = Math.Sin(phase);
+
+            // Return the same value 6 times in a row
+            return c+sineValue;
         }
 
         private void updateChart() // update array values and generate legend
@@ -70,27 +101,52 @@ namespace PlotApp
 
             for (int i = 0; i < NumberOfSignals; i++)
             {
-                newValue[i] = generateData();
+                newValue[i] = GetNextSineValue();
+                if(i == 0)
+                {
+                    newValue[i] -= c;
+                }
+                newValue[i] *= (i+1);
                 data[i] = [.. data[i], newValue[i]];
             }
 
-            // generate the signal
-            ScottPlot.Plottables.Signal[] sig = new ScottPlot.Plottables.Signal[NumberOfSignals];
+            for (int i = 0; i<NumberOfSignals; i++)
+            {
+                if (data[i].Count > MaxPoints)
+                {
+                    data[i].RemoveRange(0, data[i].Count - MaxPoints);
+                }
+            }
 
+            // generate the signal
             formsPlot1.Plot.Clear();
             for (int i = 0; i < NumberOfSignals; i++)
             {
                 if (!trace[i])
                 {
                     sig[i] = formsPlot1.Plot.Add.Signal(data[i], secondtoSample, color: palette[i]);
-                    sig[i].Axes.YAxis = axis[i];
-                    sig[i].Data.XOffset = start;
+                    if(i%2 == 0)
+                    {
+                        sig[i].Axes.YAxis = axisL[i];
+                    }
+                    else
+                    {
+                        sig[i].Axes.YAxis = axisR[i];
+                    }
+                    sig[i].Data.XOffset = counter;
                 }
             }
 
             // increment x-axis
             dataX = [.. dataX, counter];
             counter += secondtoSample;
+
+            // Write data to CSV when the limit is reached
+            if (dataX.Count() == MaxPoints)
+            {
+                WriteDataToCsv();
+            }
+
         }
 
         private void timer1_Tick(object sender, EventArgs e) // callback performed at tick rate
@@ -108,7 +164,6 @@ namespace PlotApp
 
         private void CreateChart() // set plot labels
         {
-            formsPlot1.Plot.XLabel("Time");
             formsPlot1.Plot.Axes.Remove(Edge.Left);
             formsPlot1.Plot.Axes.Remove(Edge.Right);
             formsPlot1.Plot.Axes.Remove(Edge.Top);
@@ -118,8 +173,16 @@ namespace PlotApp
             {
                 if (data[i] != null)
                 {
-                    axis[i] = formsPlot1.Plot.Axes.AddLeftAxis();
-                    axis[i].Color(palette[i]);
+                    if(i%2 == 0)
+                    {
+                        axisL[i] = formsPlot1.Plot.Axes.AddLeftAxis();
+                        axisL[i].Color(palette[i]);
+                    }
+                    else
+                    {
+                        axisR[i] = formsPlot1.Plot.Axes.AddRightAxis();
+                        axisR[i].Color(palette[i]);
+                    }
                 }
             }
             formsPlot1.Plot.Axes.DateTimeTicks(Edge.Bottom);
@@ -130,8 +193,17 @@ namespace PlotApp
         {
             if (view) // view last n
             {
-                formsPlot1.Plot.Axes.AutoScaleY();
-                formsPlot1.Plot.Axes.SetLimitsX(counter-(secondtoSample*points), counter);
+                formsPlot1.Plot.Axes.AutoScale();
+                formsPlot1.Plot.Axes.SetLimitsX(counter-(secondtoSample*seconds*conversion)+0.000235, counter+0.000235);
+                //double max = 0;
+                //for(int i = 0;i < NumberOfSignals; i++)
+                //{
+                //    if (data[i].Max() > max)
+                //    {
+                //        max = data[i].Max();
+                //    }
+                //}
+                //formsPlot1.Plot.Axes.SetLimitsY(0, max);
             }
             else // auto scale
             {
@@ -198,5 +270,26 @@ namespace PlotApp
             }
             catch (Exception) { }
         }
+
+        private void WriteDataToCsv()
+        {
+            try
+            {
+                using StreamWriter writer = new("data.csv");
+                // Write header
+                writer.WriteLine("Time," + string.Join(",", Enumerable.Range(1, NumberOfSignals).Select(i => $"Signal{i}")));
+
+                // Write data
+                for (int j = 0; j < dataX.Count(); j++)
+                {
+                    writer.WriteLine($"{dataX[j]},{string.Join(",", Enumerable.Range(0, NumberOfSignals).Select(i => data[i].Count > j ? data[i][j].ToString() : ""))}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error writing to CSV: {ex.Message}");
+            }
+        }
+
     }
 }
