@@ -42,16 +42,18 @@
             // formsPlot1
             // 
             formsPlot1.DisplayScale = 1.25F;
-            formsPlot1.Location = new Point(12, 12);
+            formsPlot1.Location = new Point(10, 9);
+            formsPlot1.Margin = new Padding(3, 2, 3, 2);
             formsPlot1.Name = "formsPlot1";
-            formsPlot1.Size = new Size(974, 484);
+            formsPlot1.Size = new Size(1213, 510);
             formsPlot1.TabIndex = 0;
             // 
             // button1
             // 
-            button1.Location = new Point(631, 511);
+            button1.Location = new Point(910, 523);
+            button1.Margin = new Padding(3, 2, 3, 2);
             button1.Name = "button1";
-            button1.Size = new Size(137, 48);
+            button1.Size = new Size(150, 55);
             button1.TabIndex = 1;
             button1.Text = "View Mode";
             button1.UseVisualStyleBackColor = true;
@@ -59,9 +61,10 @@
             // 
             // button2
             // 
-            button2.Location = new Point(786, 511);
+            button2.Location = new Point(1066, 523);
+            button2.Margin = new Padding(3, 2, 3, 2);
             button2.Name = "button2";
-            button2.Size = new Size(135, 48);
+            button2.Size = new Size(148, 55);
             button2.TabIndex = 2;
             button2.Text = "Pause";
             button2.UseVisualStyleBackColor = true;
@@ -73,9 +76,10 @@
             checkBox1.BackColor = Color.SeaGreen;
             checkBox1.Checked = true;
             checkBox1.CheckState = CheckState.Checked;
-            checkBox1.Location = new Point(20, 510);
+            checkBox1.Location = new Point(9, 540);
+            checkBox1.Margin = new Padding(3, 2, 3, 2);
             checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(84, 24);
+            checkBox1.Size = new Size(67, 19);
             checkBox1.TabIndex = 3;
             checkBox1.Text = "Signal 1";
             checkBox1.UseVisualStyleBackColor = false;
@@ -87,9 +91,10 @@
             checkBox2.BackColor = Color.DarkOrange;
             checkBox2.Checked = true;
             checkBox2.CheckState = CheckState.Checked;
-            checkBox2.Location = new Point(110, 510);
+            checkBox2.Location = new Point(87, 540);
+            checkBox2.Margin = new Padding(3, 2, 3, 2);
             checkBox2.Name = "checkBox2";
-            checkBox2.Size = new Size(84, 24);
+            checkBox2.Size = new Size(67, 19);
             checkBox2.TabIndex = 4;
             checkBox2.Text = "Signal 2";
             checkBox2.UseVisualStyleBackColor = false;
@@ -101,9 +106,10 @@
             checkBox3.BackColor = Color.Lime;
             checkBox3.Checked = true;
             checkBox3.CheckState = CheckState.Checked;
-            checkBox3.Location = new Point(200, 511);
+            checkBox3.Location = new Point(166, 541);
+            checkBox3.Margin = new Padding(3, 2, 3, 2);
             checkBox3.Name = "checkBox3";
-            checkBox3.Size = new Size(84, 24);
+            checkBox3.Size = new Size(67, 19);
             checkBox3.TabIndex = 5;
             checkBox3.Text = "Signal 3";
             checkBox3.UseVisualStyleBackColor = false;
@@ -115,9 +121,10 @@
             checkBox4.BackColor = Color.DarkGray;
             checkBox4.Checked = true;
             checkBox4.CheckState = CheckState.Checked;
-            checkBox4.Location = new Point(20, 535);
+            checkBox4.Location = new Point(9, 559);
+            checkBox4.Margin = new Padding(3, 2, 3, 2);
             checkBox4.Name = "checkBox4";
-            checkBox4.Size = new Size(84, 24);
+            checkBox4.Size = new Size(67, 19);
             checkBox4.TabIndex = 6;
             checkBox4.Text = "Signal 4";
             checkBox4.UseVisualStyleBackColor = false;
@@ -129,9 +136,10 @@
             checkBox5.BackColor = Color.DodgerBlue;
             checkBox5.Checked = true;
             checkBox5.CheckState = CheckState.Checked;
-            checkBox5.Location = new Point(110, 535);
+            checkBox5.Location = new Point(87, 559);
+            checkBox5.Margin = new Padding(3, 2, 3, 2);
             checkBox5.Name = "checkBox5";
-            checkBox5.Size = new Size(84, 24);
+            checkBox5.Size = new Size(67, 19);
             checkBox5.TabIndex = 7;
             checkBox5.Text = "Signal 5";
             checkBox5.UseVisualStyleBackColor = false;
@@ -143,9 +151,10 @@
             checkBox6.BackColor = Color.DeepPink;
             checkBox6.Checked = true;
             checkBox6.CheckState = CheckState.Checked;
-            checkBox6.Location = new Point(200, 535);
+            checkBox6.Location = new Point(166, 559);
+            checkBox6.Margin = new Padding(3, 2, 3, 2);
             checkBox6.Name = "checkBox6";
-            checkBox6.Size = new Size(84, 24);
+            checkBox6.Size = new Size(67, 19);
             checkBox6.TabIndex = 8;
             checkBox6.Text = "Signal 6";
             checkBox6.UseVisualStyleBackColor = false;
@@ -153,9 +162,9 @@
             // 
             // PlotApp
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(998, 571);
+            ClientSize = new Size(1226, 589);
             Controls.Add(checkBox6);
             Controls.Add(checkBox5);
             Controls.Add(checkBox4);
@@ -165,9 +174,10 @@
             Controls.Add(button2);
             Controls.Add(button1);
             Controls.Add(formsPlot1);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "PlotApp";
             Text = "PlotApp";
-            Load += Form1_Load;
+            //Load += Form1_Load;
             ResumeLayout(false);
             PerformLayout();
         }
