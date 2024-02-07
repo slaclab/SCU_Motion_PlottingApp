@@ -5,9 +5,9 @@ namespace PlotApp
 {
     public partial class PlotApp : Form
     {
-        static DateTime currentTime = DateTime.Now;
+        static readonly DateTime currentTime = DateTime.Now;
         double counter = currentTime.ToNumber(); // program counter
-        double start = currentTime.ToNumber(); // program starting time
+        readonly double start = currentTime.ToNumber(); // program starting time
         readonly int seconds = 10; // number of previous seconds to be plotted in n second view mode
         const int MaxPoints = 600; // number of previous points to keep in memory
         const int refresh_rate = 50; // refresh rate (1000/number)
@@ -16,7 +16,7 @@ namespace PlotApp
         const double conversion = 1000 / refresh_rate;
         const double secondtoSample = (1D / 86400) / conversion; // second to percent and convert based off of refresh rate
         int currentSampleCount = 0;
-
+        Random rand = new();
 
         // make axis and signal arrays
         readonly ScottPlot.AxisPanels.LeftAxis[] axisL = new ScottPlot.AxisPanels.LeftAxis[NumberOfSignals];
@@ -56,7 +56,25 @@ namespace PlotApp
             };
             timer1.Start();
             timer1.Elapsed += timer1_Tick;
+            FollowMouse();
             CreateChart();
+        }
+
+        private void FollowMouse()
+        {
+            formsPlot1.MouseMove += (s, e) =>
+            {
+                Pixel mousePixel = new(e.X, e.Y);
+                Coordinates mouseCoordinates = formsPlot1.Plot.GetCoordinates(mousePixel);
+                Text = $"X={((mouseCoordinates.X) - start) * 10000:N3}, Y={mouseCoordinates.Y:N3}";
+            };
+
+            formsPlot1.MouseDown += (s, e) =>
+            {
+                Pixel mousePixel = new(e.X, e.Y);
+                Coordinates mouseCoordinates = formsPlot1.Plot.GetCoordinates(mousePixel);
+                Text = $"X={((mouseCoordinates.X) - start) * 10000:N3}, Y={mouseCoordinates.Y:N3} ";
+            };
         }
 
         // generate sinusoid value
@@ -107,7 +125,6 @@ namespace PlotApp
                 if (!trace[i])
                 {
                     sig[i] = formsPlot1.Plot.Add.Signal(data[i], secondtoSample, color: palette[i]);
-                    
                     if (i % 2 == 0)
                     {
                         sig[i].Axes.YAxis = axisL[i];
@@ -116,15 +133,14 @@ namespace PlotApp
                     {
                         sig[i].Axes.YAxis = axisR[i];
                     }
-
-                    if (data[i].Count >= MaxPoints)
-                    {
-                        sig[i].Data.XOffset = counter - (secondtoSample*MaxPoints);
-                    }
-                    else
-                    {
-                        sig[i].Data.XOffset = start;
-                    }
+                }
+                if (data[i].Count >= MaxPoints)
+                {
+                    sig[i].Data.XOffset = counter - (secondtoSample * MaxPoints);
+                }
+                else
+                {
+                    sig[i].Data.XOffset = start;
                 }
             }
 
@@ -139,30 +155,12 @@ namespace PlotApp
             // update chart and view mode
             try
             {
-                formsPlot1.Invoke((MethodInvoker)delegate {
-                    // force run on UI thread
+                formsPlot1.Invoke((MethodInvoker)delegate { // force run on UI thread
                     updateChart();
                     if (!pause)
                     {
                         formsPlot1.Refresh();
                         viewMode();
-
-                    }
-                    else
-                    {
-                        formsPlot1.MouseMove += (s, e) =>
-                        {
-                            Pixel mousePixel = new(e.X, e.Y);
-                            Coordinates mouseCoordinates = formsPlot1.Plot.GetCoordinates(mousePixel);
-                            Text = $"X={((mouseCoordinates.X) - start)*10000:N3}, Y={mouseCoordinates.Y:N3}";
-                        };
-
-                        formsPlot1.MouseDown += (s, e) =>
-                        {
-                            Pixel mousePixel = new(e.X, e.Y);
-                            Coordinates mouseCoordinates = formsPlot1.Plot.GetCoordinates(mousePixel);
-                            Text = $"X={((mouseCoordinates.X) - start)*10000:N3}, Y={mouseCoordinates.Y:N3} ";
-                        };
                     }
                 });
             }
@@ -218,23 +216,18 @@ namespace PlotApp
 
             for (int j = 0; j < dataX.Length; j++)
             {
-                DateTime timestamp = currentTime.AddSeconds(dataX[j]);
+                DateTime timestamp = currentTime.AddSeconds(j/conversion);
                 string formattedTimestamp = timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                csvContent.AppendLine($"{formattedTimestamp},{string.Join(",", Enumerable.Range(0, NumberOfSignals).Select(i => data[i].Count > j ? data[i][j].ToString() : ""))}");
+                string dataValues = string.Join(",", Enumerable.Range(0, NumberOfSignals).Select(i => data[i].Count > j ? data[i][j].ToString() : ""));
+                csvContent.AppendLine($"{formattedTimestamp},{dataValues}");
             }
 
             try
             {
-                using StreamWriter writer = new StreamWriter("data.csv");
+                using StreamWriter writer = new("data.csv");
                 writer.Write(csvContent.ToString());
             }
             catch (Exception){}
-        }
-
-        Random rand = new();
-        private double generateData() // return random value
-        {
-            return rand.NextDouble() * 10;
         }
 
         private void button1_Click(object sender, EventArgs e) // view button
@@ -247,48 +240,19 @@ namespace PlotApp
             pause = !pause;
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
-            int num = 0;
-            traceException(num);
-        }
+            CheckBox checkBox = sender as CheckBox;
 
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
-        {
-            int num = 1;
-            traceException(num);
-        }
-
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
-        {
-            int num = 2;
-            traceException(num);
-        }
-
-        private void checkBox4_CheckedChanged(object sender, EventArgs e)
-        {
-            int num = 3;
-            traceException(num);
-        }
-
-        private void checkBox5_CheckedChanged(object sender, EventArgs e)
-        {
-            int num = 4;
-            traceException(num);
-        }
-
-        private void checkBox6_CheckedChanged(object sender, EventArgs e)
-        {
-            int num = 5;
-            traceException(num);
-        }
-        private void traceException(int num)
-        {
-            try
+            if (checkBox != null)
             {
-                trace[num] = !trace[num];
+                int num = (int)checkBox.Tag;
+                try
+                {
+                    trace[num] = !trace[num];
+                }
+                catch (Exception) { }
             }
-            catch (Exception) { }
         }
     }
 }

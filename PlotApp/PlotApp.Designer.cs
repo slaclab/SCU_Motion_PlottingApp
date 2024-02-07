@@ -83,7 +83,8 @@
             checkBox1.TabIndex = 3;
             checkBox1.Text = "Signal 1";
             checkBox1.UseVisualStyleBackColor = false;
-            checkBox1.CheckedChanged += checkBox1_CheckedChanged;
+            checkBox1.CheckedChanged += checkBox_CheckedChanged;
+            checkBox1.Tag = 0;
             // 
             // checkBox2
             // 
@@ -98,7 +99,8 @@
             checkBox2.TabIndex = 4;
             checkBox2.Text = "Signal 2";
             checkBox2.UseVisualStyleBackColor = false;
-            checkBox2.CheckedChanged += checkBox2_CheckedChanged;
+            checkBox2.CheckedChanged += checkBox_CheckedChanged;
+            checkBox2.Tag = 1;
             // 
             // checkBox3
             // 
@@ -113,7 +115,8 @@
             checkBox3.TabIndex = 5;
             checkBox3.Text = "Signal 3";
             checkBox3.UseVisualStyleBackColor = false;
-            checkBox3.CheckedChanged += checkBox3_CheckedChanged;
+            checkBox3.CheckedChanged += checkBox_CheckedChanged;
+            checkBox3.Tag = 2;
             // 
             // checkBox4
             // 
@@ -128,7 +131,8 @@
             checkBox4.TabIndex = 6;
             checkBox4.Text = "Signal 4";
             checkBox4.UseVisualStyleBackColor = false;
-            checkBox4.CheckedChanged += checkBox4_CheckedChanged;
+            checkBox4.CheckedChanged += checkBox_CheckedChanged;
+            checkBox4.Tag = 3;
             // 
             // checkBox5
             // 
@@ -143,7 +147,8 @@
             checkBox5.TabIndex = 7;
             checkBox5.Text = "Signal 5";
             checkBox5.UseVisualStyleBackColor = false;
-            checkBox5.CheckedChanged += checkBox5_CheckedChanged;
+            checkBox5.CheckedChanged += checkBox_CheckedChanged;
+            checkBox5.Tag = 4;
             // 
             // checkBox6
             // 
@@ -158,7 +163,8 @@
             checkBox6.TabIndex = 8;
             checkBox6.Text = "Signal 6";
             checkBox6.UseVisualStyleBackColor = false;
-            checkBox6.CheckedChanged += checkBox6_CheckedChanged;
+            checkBox6.CheckedChanged += checkBox_CheckedChanged;
+            checkBox6.Tag = 5;
             // 
             // PlotApp
             // 
